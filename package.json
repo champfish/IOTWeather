@@ -1,0 +1,21 @@
+{
+  "name": "IOTWeather",
+  "version": "0.0.1",
+  "description": "Weather station for IOT",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/champfish/IOTWeather"
+  },
+  "author": "champfish",
+  "license": "The Unlicense",
+  "dependencies": {
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "socket.io": "^4.3.1"
+  }
+}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- <link href="my.css"> -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+	<script
+	src="https://code.jquery.com/jquery-3.5.1.min.js"
+	integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+	crossorigin="anonymous"></script>
+	<script src="socket.io.min.js"></script>
+
+	<title>Noitatsrehtaew</title>
+	<style type="text/css">
+		.hell {
+			float: left
+		}
+	</style>
+</head>
+<body>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+
+	<div class="row align-items-center">
+
+		<div class="col-lg" align="center" id="cent">
+			<h1>Noitatsrehtaew</h1>
+			<i>A Local Weather Measuring and Reporting Tool</i>
+			<br>
+			<br>
+			<h2 id="temp">Temperature: 69</h2>
+			<h2 id="pressure">Pressure: Big</h2>
+			<h2 id="uv">UV: cancer</h2>
+			<br>
+			<div>
+				<button type="button" class="btn btn-info" id="butt" style="font-weight: bold;">Refresh</button>
+			</div>
+		<script type="text/javascript">
+			var socket = io();
+
+			$(document).ready(function() {
+		    	$("#butt").click(function(){
+					socket.emit("getData", "stocks", function(back){
+						if(back.valid){
+							$("#temp").text("Temperature: "+back.temp+ "°F");
+							$("#temp").css("color",getTempColor(back.temp));
+							$("#pressure").text("Pressure: "+back.pressure + "kPa");
+							$("#pressure").css("color","#FFFF");
+							$("#uv").text("UV Levels: "+back.uv + "W/m^2");
+							$("#uv").css("color","#FFE4C4");								
+						}else{
+							$("#temp").text("UNAUTHORIZED USER DETECTED");
+							$("#temp").css("color","#FF0000");
+							$("#pressure").text("");
+							$("#uv").text("");
+						}
+					});
+		    	});
+
+		    	function getTempColor(temp){
+		    		console.log(temp);
+		    		tempRed = scale(temp, 32, 110, 0, 255);
+		    		tempBlue = scale(temp, 32, 110, 255, 0);
+		    		console.log(tempRed);
+		    		hexString = "#" + tempRed.toString(16) + tempBlue.toString(16)+ "00"
+		    		alert(hexString);
+		    		return hexString
+		    	}
+
+				function scale (number, inMin, inMax, outMin, outMax) {
+				    num = Math.round((number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin);
+				    if(num>outMax){
+				    	return outMax;
+				    }else{
+				    	return num;
+				    }
+				}
+
+			});
+		</script>
+	</body>
+	</html>
