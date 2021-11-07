@@ -7,13 +7,15 @@ import time
 from uuid import uuid4
 import json
 import mariadb
-
+from decimal import Decimal
 import time
 import smbus
 import os
 import boto3
 from pprint import pprint
 import MySQLdb
+from datetime import datetime
+from decimal import *
 
 import os
 
@@ -61,7 +63,6 @@ known_face_names = [
 face_locations = []
 face_encodings = []
 face_names = []
-process_this_frame = True
 
 known_face_found = False
 # END WEB
@@ -146,27 +147,27 @@ print("not connected")
 #     )
 # cur2 = db.cursor()
 dynamodb = boto3.resource('dynamodb',region_name='us-east-2')
-table = dynamodb.create_table(
-    TableName='Weather',
-    KeySchema=[
-        {
-            'KeyType':'HASH',
-            'AttributeName':'temp'
-            }
-        ],
-    AttributeDefinitions=[
-        {
-            'AttributeName':'temp',
-            'AttributeType':'N'
-            }
-        ],
-    ProvisionedThroughput={
-        'ReadCapacityUnits':2,
-        'WriteCapacityUnits':2
-        }
-    )
-table.meta.client.get_waiter('table_exists').wait(TableName='Weather')
-
+#table = dynamodb.create_table(
+#    TableName='Weather',
+#    KeySchema=[
+#        {
+#            'KeyType':'HASH',
+#            'AttributeName':'id'
+#            }
+#        ],
+#    AttributeDefinitions=[
+#        {
+#             'AttributeName':'id',
+#             'AttributeType':'N'
+#             }
+#         ],
+#     ProvisionedThroughput={
+#         'ReadCapacityUnits':2,
+#         'WriteCapacityUnits':2
+#         }
+#     )
+# table.meta.client.get_waiter('table_exists').wait(TableName='Weather')
+table = dynamodb.Table('Weather')
 print("connected to aws")
 
 bus = smbus.SMBus(1)
@@ -214,21 +215,9 @@ else:
 c12f = float(c12d) / 16777216.0
 print("c12 = 0x%4x %5d %1.5f" % (c12, c12d, c12f))
 
-conn = mariadb.connect(
-        user="rasppi",
-        password="pi",
-        host="127.0.0.1",
-        port=3306,
-        database="weather"
-        )
-    
-cur = conn.cursor()
-
-ENDPOINT="database-1.cdghjpbpi22t.us-east-2.rds.amazonaws.com"
-PORT=3306
-USR="admin"
-REGION="us-east-2"
-
+print("how long")
+start = time.time()
+now = time.time()
 
 
 if __name__ == '__main__':
@@ -303,86 +292,87 @@ if __name__ == '__main__':
 
         loopsSinceFace = 10;
         publish_count = 1
-        process_this_frame = True
         while (publish_count <= args.count) or (args.count == 0):
             loopsSinceFace = loopsSinceFace+1
             ret, frame = video_capture.read()
             small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
             rgb_small_frame = small_frame[:, :, ::-1]
-            if process_this_frame:
-                face_locations = face_recognition.face_locations(rgb_small_frame)
-                face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+            #process a frame
+            face_locations = face_recognition.face_locations(rgb_small_frame)
+            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
-                face_names = []
-                for face_encoding in face_encodings:
-                    print("FUCK")
-                    matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-                    name = "Unknown"
+            face_names = []
+            for face_encoding in face_encodings:
+                print("FUCK")
+                matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+                name = "Unknown"
 
-                    face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-                    best_match_index = np.argmin(face_distances)
-                    if matches[best_match_index]:
-                        os.system('mpg321 -q saw.mp3 &')
-                        name = known_face_names[best_match_index]
-                        print("Face found:", name)
-                        loopsSinceFace = 0
+                face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+                best_match_index = np.argmin(face_distances)
+                if matches[best_match_index]:
+                    os.system('mpg321 -q saw.mp3 &')
+                    name = known_face_names[best_match_index]
+                    print("Face found:", name)
+                    loopsSinceFace = 0
 
-                    face_names.append(name)
+                face_names.append(name)
 
             # Start conversion and wait 1s
-            bus.write_byte_data(addr, 0x12, 0x0)
-            time.sleep(1)
-            rawpres = (bus.read_byte_data(addr, 0x00) << 2) | \
-               (bus.read_byte_data(addr, 0x01) >> 6)
-            rawtemp = (bus.read_byte_data(addr, 0x02) << 2) | \
-               (bus.read_byte_data(addr, 0x03) >> 6)
 
-            #print("\nRaw pres = 0x%3x %4d" % (rawpres, rawpres))
-            #print("Raw temp = 0x%3x %4d" % (rawtemp, rawtemp))
+            now = time.time()
+            if (now-start) > 60:
+            
+                bus.write_byte_data(addr, 0x12, 0x0)
+                time.sleep(1)
+                rawpres = (bus.read_byte_data(addr, 0x00) << 2) | \
+                   (bus.read_byte_data(addr, 0x01) >> 6)
+                rawtemp = (bus.read_byte_data(addr, 0x02) << 2) | \
+                   (bus.read_byte_data(addr, 0x03) >> 6)
 
-            pcomp = a0f + (b1f + c12f * rawtemp) * rawpres + b2f * rawtemp
-            pkpa = pcomp / 15.737 + 50
-            print("Pres = %3.2f kPa" % pkpa)
+                #print("\nRaw pres = 0x%3x %4d" % (rawpres, rawpres))
+                #print("Raw temp = 0x%3x %4d" % (rawtemp, rawtemp))
 
-            temp = 25.0 - (rawtemp - 498.0) / 5.35
-            temp2 = float("%3.2f" % temp)
-            
-            print("Temp = " , temp2)
-            
-            table.put_item(
-                TableName='Weather',
-                Item={
-                    'temp':int(temp2)
-                    }
-                )
+                pcomp = a0f + (b1f + c12f * rawtemp) * rawpres + b2f * rawtemp
+                pkpa = pcomp / 15.737 + 50
+                print("Pres = %3.2f kPa" % pkpa)
 
-            veml.set_integration_time(3)
-            uv_raw = veml.get_uva_light_intensity_raw()
-            uv = veml.get_uva_light_intensity()
-            print("%f W/(m*m) from raw value %d" % (uv, uv_raw))
-            
-            valid = (loopsSinceFace<10);
-            valid2 = "false"
-            if(valid):
-                valid2 = "true"
-            
-            f = open("weather.json", "w")
-            f.write("{\"valid\": "+valid2+",\"temp\":"+str(temp)+",\"pressure\":"+str(pkpa)+",\"uv\":"+str(uv)+"}")
-            f.close()
+                temp = 25.0 - (rawtemp - 498.0) / 5.35
+                temp2 = float("%3.2f" % temp)
+                
+                print("Temp = " , temp2)
+                
 
-            cur.execute(
-                "INSERT INTO temp (temperature) VALUES({})".format(temp2))
-            conn.commit()
-            
-            message = "{} [{}]".format(str(temp), publish_count)
-            print("Publishing message to topic '{}': {}".format(args.topic, message))
-            message_json = json.dumps(message)
-            mqtt_connection.publish(
-                topic=args.topic,
-                payload=message_json,
-                qos=mqtt.QoS.AT_LEAST_ONCE)
-            time.sleep(1)
-            publish_count += 1
+                veml.set_integration_time(3)
+                uv_raw = veml.get_uva_light_intensity_raw()
+                uv = veml.get_uva_light_intensity()
+                print("%f W/(m*m) from raw value %d" % (uv, uv_raw))
+                
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+                dt_id = now.strftime("%Y%m%d%H%M%S")
+                print(dt_string)
+                table.put_item(
+                    TableName='Weather',
+                    Item={
+                        'id':int(dt_id),
+                        'time':dt_string,
+                        'temp':int(temp2*1000),
+                        'UV':int(uv*1000),
+                        'pres':int(pkpa*1000)
+                        }
+                    )
+                
+                valid = (loopsSinceFace<10);
+                valid2 = "false"
+                if(valid):
+                    valid2 = "true"
+                
+                f = open("weather.json", "w")
+                f.write("{\"valid\": "+valid2+",\"temp\":"+str(temp)+",\"pressure\":"+str(pkpa)+",\"uv\":"+str(uv)+"}")
+                f.close()
+                start=time.time()
+                print("done")
+
 
     # CAM
     video_capture.release()
