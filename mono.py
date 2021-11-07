@@ -19,16 +19,12 @@ from decimal import *
 
 import os
 
-os.system('mpg321 -q saw.mp3 &')
-#from playsound import playsound
-
-#playsound('./1k sawtooth.mp3')
+os.system('mpg321 -q start.mp3 &')
 
 import veml6070
 ALL_INTEGRATION_TIMES = [
     veml6070.INTEGRATIONTIME_1_2T, veml6070.INTEGRATIONTIME_1T, veml6070.INTEGRATIONTIME_2T, veml6070.INTEGRATIONTIME_4T
 ]
-
 
 # WEB
 import face_recognition
@@ -218,7 +214,6 @@ print("c12 = 0x%4x %5d %1.5f" % (c12, c12d, c12f))
 print("how long")
 start = time.time()
 now = time.time()
-
 
 if __name__ == '__main__':
     # Spin up resources
