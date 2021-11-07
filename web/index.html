@@ -43,11 +43,11 @@
 		    	$("#butt").click(function(){
 					socket.emit("getData", "stocks", function(back){
 						if(back.valid){
-							$("#temp").text("Temperature: "+back.temp+ "°F");
+							$("#temp").text("Temperature: "+back.temp+ "°C");
 							$("#temp").css("color",getTempColor(back.temp));
-							$("#pressure").text("Pressure: "+back.pressure + "kPa");
+							$("#pressure").text("Pressure: "+ getPressureColor(back.pressure) + "kPa");
 							$("#pressure").css("color","#FFFF");
-							$("#uv").text("UV Levels: "+back.uv + "W/m^2");
+							$("#uv").text("UV Levels: " getPressureColor(back.uv) + "W/m^2");
 							$("#uv").css("color","#FFE4C4");								
 						}else{
 							$("#temp").text("UNAUTHORIZED USER DETECTED");
@@ -64,7 +64,28 @@
 		    		tempBlue = scale(temp, 32, 110, 255, 0);
 		    		console.log(tempRed);
 		    		hexString = "#" + tempRed.toString(16) + tempBlue.toString(16)+ "00"
-		    		alert(hexString);
+		    		return hexString
+		    	}
+
+		    	function getPressureColor(temp){
+		    		console.log(temp);
+		    		tempRed = scale(temp, 32, 110, 0, 0);
+		    		tempGreen = scale(temp, 32, 110, 255, 0);
+		    		tempBlue = scale(temp, 32, 110, 0, 0);
+		    		console.log(tempRed);
+		    		hexString = "#" + tempRed.toString(16) + tempBlue.toString(16)+ "00"
+		    		return hexString
+		    	}
+
+		    	function getUvColor(temp){
+		    		console.log(temp);
+		    		var min = 99;
+		    		var max = 101;
+		    		tempRed = scale(temp, min, max, 0, 0);
+		    		tempGreen = scale(temp, min, max, 0, 255);
+		    		tempBlue = scale(temp, min, max, 0, 0);
+		    		console.log(tempRed);
+		    		hexString = "#" + tempRed.toString(16) + tempGreen.toString(16)+ tempBlue.toString(16)
 		    		return hexString
 		    	}
 
@@ -76,7 +97,6 @@
 				    	return num;
 				    }
 				}
-
 			});
 		</script>
 	</body>
