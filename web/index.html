@@ -13,7 +13,7 @@
 	crossorigin="anonymous"></script>
 	<script src="socket.io.min.js"></script>
 
-	<title>Noitatsrehtaew</title>
+	<title>Noitats Rehtaew</title>
 	<style type="text/css">
 		.hell {
 			float: left
@@ -25,7 +25,7 @@
 
 	<div class="row align-items-center">
 		<div class="col-lg" align="center" id="cent">
-			<h1>Noitatsrehtaew</h1>
+			<h1>Noitats Rehtaew</h1>
 			<i>A Local Weather Measuring and Reporting Tool</i>
 			<br>
 			<br>
@@ -59,7 +59,6 @@
 		    	});
 
 		    	function getTempColor(temp){
-		    		console.log(temp);
 		    		tempRed = scale(temp, 32, 110, 0, 255);
 		    		tempBlue = scale(temp, 32, 110, 255, 0);
 		    		console.log(tempRed);
@@ -68,21 +67,21 @@
 		    	}
 
 		    	function getPressureColor(temp){
-		    		console.log(temp);
-		    		tempRed = scale(temp, 32, 110, 0, 0);
-		    		tempGreen = scale(temp, 32, 110, 255, 0);
-		    		tempBlue = scale(temp, 32, 110, 0, 0);
+		    		var min = 99;
+		    		var max = 101;
+		    		tempRed = scale(temp, min, max, 0, 0);
+		    		tempGreen = scale(temp, min, max, 255, 0);
+		    		tempBlue = scale(temp, min, max, 0, 0);
 		    		console.log(tempRed);
-		    		hexString = "#" + tempRed.toString(16) + tempBlue.toString(16)+ "00"
+		    		hexString = "#" + tempRed.toString(16) + tempGreen.toString(16)+ tempBlue.toString(16)
 		    		return hexString
 		    	}
 
 		    	function getUvColor(temp){
-		    		console.log(temp);
-		    		var min = 99;
-		    		var max = 101;
-		    		tempRed = scale(temp, min, max, 0, 0);
-		    		tempGreen = scale(temp, min, max, 0, 255);
+		    		var min = 0;
+		    		var max = 100;
+		    		tempRed = scale(temp, min, max, 0, 255);
+		    		tempGreen = scale(temp, min, max, 0, 0);
 		    		tempBlue = scale(temp, min, max, 0, 0);
 		    		console.log(tempRed);
 		    		hexString = "#" + tempRed.toString(16) + tempGreen.toString(16)+ tempBlue.toString(16)

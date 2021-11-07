@@ -17,16 +17,12 @@ import MySQLdb
 
 import os
 
-os.system('mpg321 -q saw.mp3 &')
-#from playsound import playsound
-
-#playsound('./1k sawtooth.mp3')
+os.system('mpg321 -q start.mp3 &')
 
 import veml6070
 ALL_INTEGRATION_TIMES = [
     veml6070.INTEGRATIONTIME_1_2T, veml6070.INTEGRATIONTIME_1T, veml6070.INTEGRATIONTIME_2T, veml6070.INTEGRATIONTIME_4T
 ]
-
 
 # WEB
 import face_recognition
@@ -228,7 +224,6 @@ ENDPOINT="database-1.cdghjpbpi22t.us-east-2.rds.amazonaws.com"
 PORT=3306
 USR="admin"
 REGION="us-east-2"
-
 
 
 if __name__ == '__main__':
