@@ -43,12 +43,12 @@
 		    	$("#butt").click(function(){
 					socket.emit("getData", "stocks", function(back){
 						if(back.valid){
-							$("#temp").text("Temperature: "+back.temp+ "°C");
+							$("#temp").text("Temperature: "+back.temp.toFixed(2)+ "°C");
 							$("#temp").css("color",getTempColor(back.temp));
-							$("#pressure").text("Pressure: "+ getPressureColor(back.pressure) + "kPa");
-							$("#pressure").css("color","#FFFF");
-							$("#uv").text("UV Levels: " getPressureColor(back.uv) + "W/m^2");
-							$("#uv").css("color","#FFE4C4");								
+							$("#pressure").text("Pressure: "+ back.pressure.toFixed(2) + "kPa");
+							$("#pressure").css("color",getPressureColor(back.pressure));
+							$("#uv").text("UV Levels: " + back.uv.toFixed(2) + "W/m^2");
+							$("#uv").css("color",getUvColor(back.uv));								
 						}else{
 							$("#temp").text("UNAUTHORIZED USER DETECTED");
 							$("#temp").css("color","#FF0000");
@@ -59,10 +59,10 @@
 		    	});
 
 		    	function getTempColor(temp){
-		    		tempRed = scale(temp, 32, 110, 0, 255);
-		    		tempBlue = scale(temp, 32, 110, 255, 0);
+		    		tempRed = scale(temp, 0, 40, 0, 255);
+		    		tempBlue = scale(temp, 0, 40, 255, 0);
 		    		console.log(tempRed);
-		    		hexString = "#" + tempRed.toString(16) + tempBlue.toString(16)+ "00"
+		    		hexString = "#" + tempRed.toString(16).padStart(2,'0') + tempBlue.toString(16).padStart(2,'0')+ "00"
 		    		return hexString
 		    	}
 
@@ -73,18 +73,20 @@
 		    		tempGreen = scale(temp, min, max, 255, 0);
 		    		tempBlue = scale(temp, min, max, 0, 0);
 		    		console.log(tempRed);
-		    		hexString = "#" + tempRed.toString(16) + tempGreen.toString(16)+ tempBlue.toString(16)
-		    		return hexString
+		    		hexString = "#" + tempRed.toString(16).padStart(2,'0') + tempGreen.toString(16).padStart(2,'0')+ tempBlue.toString(16).padStart(2,'0')
+		    		console.log(hexString)
+				return hexString
 		    	}
 
 		    	function getUvColor(temp){
 		    		var min = 0;
-		    		var max = 100;
+		    		var max = 1;
 		    		tempRed = scale(temp, min, max, 0, 255);
+				console.log('anita '+temp+' '+tempRed);
 		    		tempGreen = scale(temp, min, max, 0, 0);
 		    		tempBlue = scale(temp, min, max, 0, 0);
-		    		console.log(tempRed);
-		    		hexString = "#" + tempRed.toString(16) + tempGreen.toString(16)+ tempBlue.toString(16)
+		    		hexString = "#" + tempRed.toString(16).padStart(2,'0') + tempGreen.toString(16).padStart(2,'0')+ tempBlue.toString(16).padStart(2,'0')
+				console.log(hexString)
 		    		return hexString
 		    	}
 

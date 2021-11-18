@@ -19,7 +19,7 @@ from decimal import *
 
 import os
 
-os.system('mpg321 -q start.mp3 &')
+os.system('mpg321 -q mj2.mp3 &')
 
 import veml6070
 ALL_INTEGRATION_TIMES = [
@@ -52,8 +52,8 @@ known_face_encodings = [
 known_face_names = [
     "Julie Smith",
     "sleepyhead",
-    "Asshole",
-    "bitch boi"
+    "Nick",
+    "Christian"
 ]
 
 face_locations = []
@@ -214,6 +214,7 @@ print("c12 = 0x%4x %5d %1.5f" % (c12, c12d, c12f))
 print("how long")
 start = time.time()
 now = time.time()
+strin = ""
 
 if __name__ == '__main__':
     # Spin up resources
@@ -298,7 +299,7 @@ if __name__ == '__main__':
 
             face_names = []
             for face_encoding in face_encodings:
-                print("FUCK")
+                print("facE found")
                 matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
                 name = "Unknown"
 
@@ -314,34 +315,34 @@ if __name__ == '__main__':
 
             # Start conversion and wait 1s
 
+            
+            bus.write_byte_data(addr, 0x12, 0x0)
+            time.sleep(0.1)
+            rawpres = (bus.read_byte_data(addr, 0x00) << 2) | \
+               (bus.read_byte_data(addr, 0x01) >> 6)
+            rawtemp = (bus.read_byte_data(addr, 0x02) << 2) | \
+               (bus.read_byte_data(addr, 0x03) >> 6)
+
+            #print("\nRaw pres = 0x%3x %4d" % (rawpres, rawpres))
+            #print("Raw temp = 0x%3x %4d" % (rawtemp, rawtemp))
+
+            pcomp = a0f + (b1f + c12f * rawtemp) * rawpres + b2f * rawtemp
+            pkpa = pcomp / 15.737 + 50
+            print("Pres = %3.2f kPa" % pkpa)
+
+            temp = 25.0 - (rawtemp - 498.0) / 5.35
+            temp2 = float("%3.2f" % temp)
+            
+            print("Temp = " , temp2)
+            
+
+            veml.set_integration_time(1)
+            uv_raw = veml.get_uva_light_intensity_raw()
+            uv = veml.get_uva_light_intensity()
+            print("%f W/(m*m) from raw value %d" % (uv, uv_raw))
+                
             now = time.time()
             if (now-start) > 60:
-            
-                bus.write_byte_data(addr, 0x12, 0x0)
-                time.sleep(1)
-                rawpres = (bus.read_byte_data(addr, 0x00) << 2) | \
-                   (bus.read_byte_data(addr, 0x01) >> 6)
-                rawtemp = (bus.read_byte_data(addr, 0x02) << 2) | \
-                   (bus.read_byte_data(addr, 0x03) >> 6)
-
-                #print("\nRaw pres = 0x%3x %4d" % (rawpres, rawpres))
-                #print("Raw temp = 0x%3x %4d" % (rawtemp, rawtemp))
-
-                pcomp = a0f + (b1f + c12f * rawtemp) * rawpres + b2f * rawtemp
-                pkpa = pcomp / 15.737 + 50
-                print("Pres = %3.2f kPa" % pkpa)
-
-                temp = 25.0 - (rawtemp - 498.0) / 5.35
-                temp2 = float("%3.2f" % temp)
-                
-                print("Temp = " , temp2)
-                
-
-                veml.set_integration_time(3)
-                uv_raw = veml.get_uva_light_intensity_raw()
-                uv = veml.get_uva_light_intensity()
-                print("%f W/(m*m) from raw value %d" % (uv, uv_raw))
-                
                 now = datetime.now()
                 dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
                 dt_id = now.strftime("%Y%m%d%H%M%S")
@@ -357,18 +358,19 @@ if __name__ == '__main__':
                         }
                     )
                 
-                valid = (loopsSinceFace<10);
-                valid2 = "false"
-                if(valid):
-                    valid2 = "true"
-                
-                f = open("weather.json", "w")
-                f.write("{\"valid\": "+valid2+",\"temp\":"+str(temp)+",\"pressure\":"+str(pkpa)+",\"uv\":"+str(uv)+"}")
-                f.close()
                 start=time.time()
                 print("done")
 
+            strin = ",\"temp\":"+str(temp)+",\"pressure\":"+str(pkpa)+",\"uv\":"+str(uv)+"}"
 
+            valid = (loopsSinceFace<5);
+            valid2 = "false"
+            if(valid):
+                valid2 = "true"
+                
+            f = open("weather.json", "w")
+            f.write("{\"valid\": "+valid2+strin)
+            f.close()
     # CAM
     video_capture.release()
     cv2.destroyAllWindows()
